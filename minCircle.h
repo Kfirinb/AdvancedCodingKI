@@ -46,7 +46,7 @@ const float INF = 1e18;
 
 // Function to return the euclidean distance
 // between two points
-float dist(const Point& a, const Point& b) //SHORTEN, put in the right place - ISRAEL - CHECK if there's a function of euclidean dist in algorithm library or other
+float dist(const Point& a, const Point& b) //SHORTEN, put in the right place
 {
     return sqrt(pow(a.x - b.x, 2)
                 + pow(a.y - b.y, 2));
@@ -54,7 +54,7 @@ float dist(const Point& a, const Point& b) //SHORTEN, put in the right place - I
 
 // Function to check whether a point lies inside
 // or on the boundaries of the circle
-bool is_inside(const Circle& c, const Point& p) //SHORTEN, put and if in the right place- KFIR
+bool is_inside(const Circle& c, const Point& p) //SHORTEN, put if in the right place
 {
     return dist(c.center, p) <= c.radius;
 }
@@ -101,13 +101,13 @@ Circle circle_from(const Point& A, const Point& B)
 // Function to check whether a circle
 // encloses the given points
 bool is_valid_circle(const Circle& c,
-                     const vector<Point>& P)
+                     const vector<Point>& points_on_boundary)
 {
 
     // Iterating through all the points
     // to check  whether the points
     // lie inside the circle or not
-    for (const Point& p : P)
+    for (const Point& p : points_on_boundary)
         if (!is_inside(c, p))
             return false;
     return true;
@@ -115,30 +115,29 @@ bool is_valid_circle(const Circle& c,
 
 // Function to return the minimum enclosing
 // circle for N <= 3
-Circle min_circle_trivial(vector<Point>& P)
+Circle min_circle_trivial(vector<Point>& points_on_boundary)
 {
-    assert(P.size() <= 3);
-    if (P.empty()) {
+    assert(points_on_boundary.size() <= 3);
+    if (points_on_boundary.empty()) {
         return { { 0, 0 }, 0 };
     }
-    else if (P.size() == 1) {
-        return { P[0], 0 };
+    else if (points_on_boundary.size() == 1) {
+        return { points_on_boundary[0], 0 };
     }
-    else if (P.size() == 2) {
-        return circle_from(P[0], P[1]);
+    else if (points_on_boundary.size() == 2) {
+        return circle_from(points_on_boundary[0], points_on_boundary[1]);
     }
 
     // To check if MEC can be determined
     // by 2 points only
     for (int i = 0; i < 3; i++) {
         for (int j = i + 1; j < 3; j++) {
-
-            Circle c = circle_from(P[i], P[j]);
-            if (is_valid_circle(c, P))
+            Circle c = circle_from(points_on_boundary[i], points_on_boundary[j]);
+            if (is_valid_circle(c, points_on_boundary))
                 return c;
         }
     }
-    return circle_from(P[0], P[1], P[2]);
+    return circle_from(points_on_boundary[0], points_on_boundary[1], points_on_boundary[2]);
 }
 
 // Returns the MEC using Welzl's algorithm
@@ -146,49 +145,45 @@ Circle min_circle_trivial(vector<Point>& P)
 // points on the circle boundary.
 // n represents the number of points in P
 // that are not yet processed.
-Circle welzl_helper(vector<Point>& P,
-                    vector<Point> R, int n)
-{
+
+//Circle welzl_helper(vector<Point>& P,vector<Point> R, int n)
+Circle welzlAlgorithm(Point** points,vector<Point> points_on_boundary, size_t size) {
     // Base case when all points processed or |R| = 3
-    if (n == 0 || R.size() == 3) {
-        return min_circle_trivial(R);
+    if (size == 0 || points_on_boundary.size() == 3) {
+        return min_circle_trivial(points_on_boundary);
     }
 
     // Pick a random point randomly
-    int idx = rand() % n;
-    Point p = P[idx];
+    int random_index = rand() % size;
+    Point p = *points[random_index];
 
     // Put the picked point at the end of P
     // since it's more efficient than
     // deleting from the middle of the vector
-    swap(P[idx], P[n - 1]);
+    swap(*points[random_index], *points[size - 1]);
 
     // Get the MEC circle d from the
     // set of points P - {p}
-    Circle d = welzl_helper(P, R, n - 1);
+    Circle MEC = welzlAlgorithm(points, points_on_boundary, size - 1);
 
-    // If d contains p, return d
-    if (is_inside(d, p)) {
-        return d;
+    //If d contains p, return d
+    if (is_inside(MEC, p)) {
+        return MEC;
     }
 
     // Otherwise, must be on the boundary of the MEC
-    R.push_back(p);
+    points_on_boundary.push_back(p);
 
     // Return the MEC for P - {p} and R U {p}
-    return welzl_helper(P, R, n - 1);
+   return welzlAlgorithm(points, points_on_boundary, size - 1);
 }
 
 //Circle welzl(const vector<Point>& P)
-Circle findMinCircle(Point** P, size_t N)
+Circle findMinCircle(Point** points, size_t size)
 {
-    vector<Point> P_copy;
-    //vector<Point> P_copy = P;
-    for(int i = 0 ; i < N ; i++) {
-        P_copy.push_back(*P[i]);
-    }
-
-    random_shuffle(P_copy.begin(), P_copy.end());
-    return welzl_helper(P_copy, {}, P_copy.size());
+   // random_shuffle(*points[0], *points[size - 1]);
+    return welzlAlgorithm(points, {}, size);
 }
+
+
 #endif /* MINCIRCLE_H_ */
