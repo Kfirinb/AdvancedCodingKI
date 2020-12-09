@@ -46,7 +46,7 @@ const float INF = 1e18;
 
 // Function to return the euclidean distance
 // between two points
-float dist(const Point& a, const Point& b) //SHORTEN, put in the right place
+float dist(const Point& a, const Point& b) //SHORTEN, put in the right place - ISRAEL - CHECK if there's a function of euclidean dist in algorithm library or other
 {
     return sqrt(pow(a.x - b.x, 2)
                 + pow(a.y - b.y, 2));
@@ -54,7 +54,7 @@ float dist(const Point& a, const Point& b) //SHORTEN, put in the right place
 
 // Function to check whether a point lies inside
 // or on the boundaries of the circle
-bool is_inside(const Circle& c, const Point& p) //SHORTEN, put if in the right place
+bool is_inside(const Circle& c, const Point& p) //SHORTEN, put and if in the right place- KFIR
 {
     return dist(c.center, p) <= c.radius;
 }
