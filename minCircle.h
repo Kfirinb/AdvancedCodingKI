@@ -1,12 +1,10 @@
 //205812290    209013168
-
 #ifndef MINCIRCLE_H_
 #define MINCIRCLE_H_
 #include <iostream>
 #include <algorithm>
 #include <math.h>
 #include <vector>
-//
 using namespace std;
 // ------------ DO NOT CHANGE -----------
 class Point{
@@ -23,7 +21,7 @@ public:
 };
 
 /*The following two functions are used to find the equation of the circle with three given points.
-the method is to get a circle defined by 3 points: */
+the method is to get a circle defined by 3 points */
 Point get_circle_center(const Point& A, const Point& B,const Point& C) {
     float bx = B.x - A.x, by = B.y - A.y, cx = C.x - A.x, cy = C.y - A.y;
     float AB = bx * bx + by * by;
@@ -31,8 +29,8 @@ Point get_circle_center(const Point& A, const Point& B,const Point& C) {
     float ABC = bx * cy - by * cx;
     return Point((cy * AB - by * AC) / (2 * ABC), (bx * AC - cx * AB) / (2 * ABC));
 }
-/* Func' that return a unique circle that intersects three points, doint that with
-getting circle center to the 3 points: */
+
+/* Function that return a circle from three points */
 Circle circle_from(const Point& A, const Point& B,const Point& C) {
     Point circleCenter = get_circle_center(A,B,C);
     circleCenter.x += A.x;
@@ -41,17 +39,17 @@ Circle circle_from(const Point& A, const Point& B,const Point& C) {
     Circle* c = new Circle(circleCenter, radius);
     return *c;
 }
-/* Function to return the smallest circle that intersects 2 points, in the func, we set 
- the center to be the midpoint of A and B, and the radius to be half the distance AB: */
+
+/* Function to return the smallest circle from 2 points by setting
+ the center of the circle to be the midpoint of A and B, and the radius to be half the distance AB */
 Circle circle_from(const Point& A, const Point& B) {
     Point* circleCenter = new Point((A.x + B.x) / 2.f, (A.y + B.y) / 2.f );
     float radius = float(std::hypot(A.x - B.x, A.y - B.y)) / 2.f;
     Circle* c = new Circle(*circleCenter, radius);
     return *c;
 }
-/* Function to check whether a circle encloses *all* the given points,
-We are iterating through all the points to check whether the points are inside
-the circle bounderies (include the bounderies themselves), if not - return false: */
+
+/* Function to check whether a circle encloses *all* the given points, if not - return false */
 bool is_valid_circle(const Circle& c, const vector<Point>& points_on_boundary) {
     for (const Point& p : points_on_boundary) {
         if ((std::hypot(c.center.x - p.x, c.center.y - p.y) <= c.radius) == false)
@@ -59,9 +57,10 @@ bool is_valid_circle(const Circle& c, const vector<Point>& points_on_boundary) {
     }
     return true;
 }
-/* Function to return the minimum enclosing circle for N <= 3, and we check as well
-if MEC can be determined by 2 points only. */
-Circle min_circle_trivial(vector<Point>& points_on_boundary) {
+
+/* Function to return the minimum enclosing circle for size of points_on_boundary <= 3, and we check as well
+if MEC can be determined by 2 points only */
+Circle min_circle_enclosing(vector<Point>& points_on_boundary) {
     if(points_on_boundary.size() > 3) {
         throw std::invalid_argument("The Points on the boudary are greater than three");
     }
@@ -81,17 +80,20 @@ Circle min_circle_trivial(vector<Point>& points_on_boundary) {
     }
     return circle_from(points_on_boundary[0], points_on_boundary[1], points_on_boundary[2]);
 }
-/* We are Returning the MEC with the Welzl's algorithm.
- It takes a set of input points P and a set R points on the circle boundary.
- n representing the number of points in P that are not yet processed.
- We check the base case -  when all points processed or |R| = 3, if not,
- we take random point than add it to points we finished to work with,
- in a way that check for the added point what is the current minimal circle.
- In the func we check boundries state etc, to make it as efficient as possible:
+
+/*This function returns the MEC(Minimum Enclosing Circle) with the Welzl's algorithm.
+ The function gets a set of points and a set of points on the boundary's circle.
+ "size" is the number of points left to cover.
+ First the function checks if all points are covered or size of points_on_boundary is 3
+ if so then we call the function min_circle_enclosing,if not,
+ we take a random point from points and then swap it with the end point of points
+ as a way to delete the random point from the points array.
+ Then we check if the random point is in the current minimal circle, if not
+ then we push it to the points_on_boundary vector.
 */
 Circle welzlAlgorithm(Point** points,vector<Point> points_on_boundary, size_t size) {
     if (size == 0 || points_on_boundary.size() == 3) {
-        return min_circle_trivial(points_on_boundary);
+        return min_circle_enclosing(points_on_boundary);
     }
     int random_index = rand() % size;
     Point p = *points[random_index];
@@ -103,7 +105,8 @@ Circle welzlAlgorithm(Point** points,vector<Point> points_on_boundary, size_t si
     points_on_boundary.push_back(p);
     return welzlAlgorithm(points, points_on_boundary, size - 1);
 }
-//checking minimal circle for given points
+
+//This function finds the minimal radius circle for given points using the Welzl algorithm
 Circle findMinCircle(Point** points, size_t size) {
     random_shuffle(&points[0], &points[size - 1]);
     return welzlAlgorithm(points, {}, size);
