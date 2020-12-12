@@ -3,10 +3,7 @@
 #ifndef MINCIRCLE_H_
 #define MINCIRCLE_H_
 #include <iostream>
-//----Testing---
 #include <algorithm>
-#include <assert.h>
-#include <iostream>
 #include <math.h>
 #include <vector>
 //
@@ -24,47 +21,15 @@ public:
     float radius;
     Circle(Point c,float r):center(c),radius(r){}
 };
-// --------------------------------------
-/*
-// implement
-Circle findMinCircle(Point** points,size_t size){
-	return Circle(Point(0,0),0);
-}
-*/
-// you may add helper functions here
-//-------------------------TESTING--------------------------------
-
-// Defining infinity
-const float INF = 1e18;
 
 // **The following two functions are used to find the equation of the circle with three given points**
 // Method to get a circle defined by 3 points, as it a critical part of the solution:
-/*
-//Point get_circle_center(float bx, float by,float cx, float cy) {
 Point get_circle_center(const Point& A, const Point& B,const Point& C) {
-    float m_AB = (B.y - A.y) / (B.x - A.x);
-    float m_BC = (C.y - B.y) / (C.x - B.x);
-    float center_x = (m_AB * m_BC*(A.y - C.y) + m_BC*(A.x + B.x) - m_AB*(B.x + C.x)) / 2*(m_BC - m_AB);
-    float center_y = (center_x - (A.x+B.x)/2)/m_AB + (A.y+B.y)/2;
-    Point* center = new Point(center_x, center_y);
-    return *center;
-
-    float B = bx * bx + by * by;
-    float C = cx * cx + cy * cy;
-    float D = bx * cy - by * cx;
-    Point* p = new Point((cy * B - by * C) / (2 * D),(bx * C - cx * B) / (2 * D));
-    //return { (cy * B - by * C) / (2 * D),
-          //   (bx * C - cx * B) / (2 * D) };
-    return *p;
-
-}*/
-
-Point get_circle_center(float bx, float by,
-                        float cx, float cy) {
-    double B = bx * bx + by * by;
-    double C = cx * cx + cy * cy;
-    double D = bx * cy - by * cx;
-    return Point((cy * B - by * C) / (2 * D), (bx * C - cx * B) / (2 * D));
+    float bx = B.x - A.x, by = B.y - A.y, cx = C.x - A.x, cy = C.y - A.y;
+    float AB = bx * bx + by * by;
+    float AC = cx * cx + cy * cy;
+    float ABC = bx * cy - by * cx;
+    return Point((cy * AB - by * AC) / (2 * ABC), (bx * AC - cx * AB) / (2 * ABC));
 
 }
 
@@ -72,14 +37,12 @@ Point get_circle_center(float bx, float by,
 // intersects three points
 Circle circle_from(const Point& A, const Point& B,const Point& C)
 {
-    Point circleCenter = get_circle_center(B.x - A.x, B.y - A.y,C.x - A.x, C.y - A.y);
-   // Point circleCenter = get_circle_center(A,B,C);
+    //Point circleCenter = get_circle_center(B.x - A.x, B.y - A.y,C.x - A.x, C.y - A.y);
+    Point circleCenter = get_circle_center(A,B,C);
     circleCenter.x += A.x;
     circleCenter.y += A.y;
     float radius = float(std::hypot(circleCenter.x - A.x, circleCenter.y - A.y));
     Circle* c = new Circle(circleCenter, radius);
-
-    //using euclidean distance in the right side of the return function line below
     return *c;
 }
 // Function to return the smallest circle
@@ -87,14 +50,11 @@ Circle circle_from(const Point& A, const Point& B,const Point& C)
 Circle circle_from(const Point& A, const Point& B) {
     // Set the center to be the midpoint of A and B:
     Point* circleCenter = new Point((A.x + B.x) / 2.f, (A.y + B.y) / 2.f );
-    //Point C = { (A.x + B.x) / 2.f, (A.y + B.y) / 2.f };
 
     // Set the radius to be half the distance AB, doing that with
     float radius = float(std::hypot(A.x - B.x, A.y - B.y)) / 2.f;
 
     Circle* c = new Circle(*circleCenter, radius);
-
-    // using euclidean distance in the right side of the return function line below:
     return *c;
 }
 
@@ -175,7 +135,7 @@ Circle welzlAlgorithm(Point** points,vector<Point> points_on_boundary, size_t si
 
 Circle findMinCircle(Point** points, size_t size)
 {
-    // random_shuffle(*points[0], *points[size - 1]);
+    random_shuffle(&points[0], &points[size - 1]);
     return welzlAlgorithm(points, {}, size);
 }
 #endif /* MINCIRCLE_H_ */
